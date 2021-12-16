@@ -1,0 +1,5 @@
+services:
+  activator-fe:
+    image: 
+  activator-be:
+    image: 
