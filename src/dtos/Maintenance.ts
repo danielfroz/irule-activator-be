@@ -10,9 +10,14 @@ export interface Maintenance {
   key: string
   /** name for easier identification */
   name: string
-  /** state of Maintenance Window */
-  status: 'Creating'|'InProgress'|'RollingBack'|'Finished'
+  /** status of Maintenance Window */
+  status: 'Created'|'VerificationInProgress'|'VerificationFailed'|'Verified'|'Started'|'RolledBack'|'Finished'
+  /** points to the active device */
+  device: i.Device
+  /** activities which will happen during verification or during the maintenance window */
   activities: Array<i.Activity>
-  /** creating object on the fly */
-  state: any
+  /** virtualServer targetted for this Maintenance Window */
+  virtualServer: string
+  /** iRule which will be applied */
+  iRule: string
 }

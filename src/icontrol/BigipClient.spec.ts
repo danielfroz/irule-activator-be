@@ -1,7 +1,7 @@
 import { BigipClient } from '.'
 import { Bigip } from '../dtos'
 
-describe('BigipClient', async function () {
+describe.only('BigipClient', async function () {
   it('Shall obtain all virtual servers configuration', async () => {
     const bigip = {
       address: 'https://10.3.0.11',
@@ -12,9 +12,6 @@ describe('BigipClient', async function () {
     
     await tm.login()
 
-    // const syncStatus = await tm.getSyncStatus()
-    // console.log('status: %o', syncStatus)
-
     const devices = await tm.getDevices()
     console.log('devices: %o', devices)
 
@@ -23,6 +20,9 @@ describe('BigipClient', async function () {
 
     const irules = await tm.getIrules()
     console.log('irules: %o', irules)
+
+    const syncStatus = await tm.getSyncStatus()
+    console.log('status: %o', syncStatus)
 
     await tm.logout()
   })

@@ -1,4 +1,6 @@
 export interface Activity {
+  date: Date
   type: string
-  message: string
+  message?: string
+  error?: string
 }

@@ -1,6 +1,6 @@
 import https from 'https'
 import axios, { Axios } from 'axios'
-import { Bigip } from '../dtos'
+import { Bigip, Device, SyncStatus } from '../dtos'
 
 export class BigipClient {
   private client: Axios
@@ -48,7 +48,7 @@ export class BigipClient {
     // console.log('logout() res.data: %o', res.data)
   }
 
-  async getDevices() {
+  async getDevices(): Promise<Device[]> {
     if(!this.token)
       throw new Error('Login required')
     const url = `${this.bigip.address}/mgmt/tm/cm/device`
@@ -57,7 +57,7 @@ export class BigipClient {
         'X-F5-Auth-Token': this.token
       }
     })
-    const devices = new Array<any>()
+    const devices = new Array<Device>()
     for(const device of res.data.items) {
       // console.log('device: %o', device)
       devices.push({
@@ -69,32 +69,49 @@ export class BigipClient {
     return devices
   }
 
-  async getSyncStatus() {
+  async getSyncStatus(): Promise<SyncStatus> {
     if(!this.token)
       throw new Error('login required')
+
     const url = `${this.bigip.address}/mgmt/tm/cm/sync-status`
     const res = await this.client.get(url, {
       headers: {
         'X-F5-Auth-Token': this.token
       }
     })
-    const statuses = new Array<any>()
-    for(const k of Object.keys(res.data.entries)) {
-      const status = res.data.entries[k]
-      console.log('status: %o', status)
-      statuses.push({
+
+    const entries = res.data.entries
+
+    let syncStatus: SyncStatus
+    for(const k of Object.keys(entries)) {
+      const et = entries[k].nestedStats.entries
+
+      let status = et.status.description
+      if(status !== 'In Sync' && 
+        status !== 'Disconnected' && 
+        status !== 'Changes Pending') {
+        console.error('BigipClient.getSyncStatus(): bigip: %o; unknown status.description: %o', this.bigip.address, status)
+        // throw new Error(`Unknown status.description ${status}`)
+      }
+        
+      let summary = et.summary.description
+      if(summary === ' ')
+        summary = undefined
+
+      syncStatus = {
         group: k,
-        status: status.nestedStats.status.description,
-        summary: status.nestedStats.summary.description
-      })
+        status,
+        summary
+      } as SyncStatus
     }
-    // console.log(res.data)
-    return statuses
+
+    return syncStatus!
   }
 
   async getVirtualServers() {
     if(!this.token)
       throw new Error('Login required')
+
     const url = `${this.bigip.address}/mgmt/tm/ltm/virtual`
     const res = await this.client.get(url, {
       headers: {
