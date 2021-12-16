@@ -46,11 +46,13 @@ export class MaintenanceService {
     maintenance.activities = new Array<Activity>()
     maintenance.activities.push({
       date: new Date(),
-      type: 'Admin',
+      owner: 'Admin',
       message: `created`
     })
 
     this._map.set(maintenance.key, maintenance)
+
+    log.info('maintenance created: %o', maintenance)
 
     return {
       maintenance
@@ -105,11 +107,10 @@ export class MaintenanceService {
       
       for(const clusterName of Object.keys(config.targets)) {
         const cluster = config.targets[clusterName]
-        console.log('cluster: %o', clusterName)
   
         maintenance.activities.push({
           date: new Date(),
-          type: 'Check',
+          owner: 'Cluster',
           message: `Checking cluster ${clusterName}`
         })
   
@@ -119,22 +120,21 @@ export class MaintenanceService {
   
           maintenance.activities.push({
             date: new Date(),
-            type: 'Bigip',
+            owner: 'Cluster',
             message: `Connecting to bigip ${bigip.address}`
           })
 
+          await icontrol.login()
           try {
-            await icontrol.login()
-  
             const devices = await icontrol.getDevices()
-            console.log('checking devices: %o', devices)
+            // console.log('checking devices: %o', devices)
   
             // check if versions are the same in all bigip instances
             const versions = new Map<string, number>()
             // check if both devices are active / standby or active / active
             for(const d of devices) {
               if(d.failoverState != 'active' && d.failoverState != 'standby') {
-                throw new Error(`bigip ${bigip.address}; returned device with invalid failover state`)
+                throw new Error(`bigip ${bigip.address}; indicated a device with invalid failover state: ${d.failoverState}`)
               }
               if(d.failoverState === 'active') {
                 maintenance.device = d
@@ -144,7 +144,7 @@ export class MaintenanceService {
             }
             maintenance.activities.push({
               date: new Date(),
-              type: 'Bigip',
+              owner: 'Bigip',
               message: `bigip ${bigip.address} devices failover state... Check`
             })
   
@@ -154,7 +154,7 @@ export class MaintenanceService {
             }
             maintenance.activities.push({
               date: new Date(),
-              type: 'Bigip',
+              owner: 'Bigip',
               message: `bigip ${bigip.address} version... Check`
             })
   
@@ -165,7 +165,7 @@ export class MaintenanceService {
             }
             maintenance.activities.push({
               date: new Date(),
-              type: 'Bigip',
+              owner: 'Bigip',
               message: `bigip ${bigip.address} status In Sync... Check`
             })
   
@@ -180,7 +180,7 @@ export class MaintenanceService {
             }
             maintenance.activities.push({
               date: new Date(),
-              type: 'Bigip',
+              owner: 'Bigip',
               message: `bigip ${bigip.address} virtual server... Check`
             })
   
@@ -194,8 +194,8 @@ export class MaintenanceService {
             }
             maintenance.activities.push({
               date: new Date(),
-              type: 'Bigip',
-              message: `Bigip ${bigip.address} iRule... Check`
+              owner: 'Bigip',
+              message: `bigip ${bigip.address} iRule... Check`
             })
           }
           finally {
@@ -209,7 +209,7 @@ export class MaintenanceService {
     catch(error: any) {
       maintenance.activities.push({
         date: new Date(),
-        type: 'Bigip',
+        owner: 'Bigip',
         error: `error caught: ${error.message}`
       })
       maintenance.status = 'VerificationFailed'
@@ -243,8 +243,6 @@ export class MaintenanceService {
 
     const config = this.config
     const result = {} as Cqrs.MaintenanceIRuleResult
-
-    console.log('checking iRules... ')
 
     for(const t of Object.keys(config.targets)) {
       // only prepare for this particular cluster...

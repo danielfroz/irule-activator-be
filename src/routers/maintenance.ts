@@ -44,6 +44,7 @@ r.post('/delete', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/delete: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -65,6 +66,7 @@ r.post('/get', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/get: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -81,6 +83,7 @@ r.post('/list', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/list: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -103,7 +106,7 @@ r.post('/verify', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
-    log.error('maintenance/verify: caught error: %o', e)
+    log.error('maintenance/verify: caught error: %o', e.message)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -120,6 +123,7 @@ r.get('/cluster', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/cluster: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -141,6 +145,7 @@ r.post('/irule', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/irule: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }
@@ -162,6 +167,7 @@ r.post('/virtualserver', async (req: AppRequest, res) => {
     return res.status(200).json(result)
   }
   catch(e: any) {
+    log.error('maintenance/virtualserver: error caught: %o', e)
     const error = { error: { code: 'exception', message: e.message }}
     return res.status(500).json(error)
   }

@@ -15,12 +15,3 @@ targets:
       address: https://10.3.0.12
       username: admin
       password: 123qwe
-  cluster02:
-    bigip21:
-      address: https://10.3.0.11
-      username: admin
-      password: 123qwe
-    bigip22:
-      address: https://10.3.0.11
-      username: admin
-      password: 123qwe

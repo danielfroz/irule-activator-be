@@ -1,6 +1,6 @@
 export interface Activity {
   date: Date
-  type: string
+  owner: string
   message?: string
   error?: string
 }
